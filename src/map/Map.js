@@ -134,7 +134,7 @@ export const Map = Evented.extend({
 		this._sizeChanged = true;
 
 		this._initContainer(id);
-		this._initLayout();
+		this._initLayout();  // 初始化各类层
 
 		this._initEvents();
 

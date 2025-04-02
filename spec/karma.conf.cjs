@@ -7,19 +7,26 @@ module.exports = function (/** @type {import('karma').Config} */ config) {
 		basePath: '../',
 		plugins: [
 			'karma-mocha',
-			'karma-sinon',
-			'karma-chai',
 			'karma-chrome-launcher',
 			'karma-safarinative-launcher',
 			'karma-firefox-launcher',
-			'karma-time-stats-reporter'
+			'karma-time-stats-reporter',
+			{'preprocessor:replaceVersion': ['factory', require('./karma-version-preprocessor.cjs')]}
 		],
-		frameworks: ['mocha', 'sinon', 'chai'],
+		preprocessors: {
+			'src/Leaflet.js': ['replaceVersion'] // Replace version import from package.json with static version for Firefox which currently not supports Import Attributes.
+		},
+		frameworks: ['mocha'],
 		customContextFile: 'spec/context.html',
 		customDebugFile: 'spec/debug.html',
 		files: [
-			{pattern: 'node_modules/**', included: false, served: true},
-			{pattern: 'dist/**/*.js', included: false, served: true},
+			{pattern: 'node_modules/chai/**/*', included: false, served: true},
+			{pattern: 'node_modules/prosthetic-hand/**/*', included: false, served: true},
+			{pattern: 'node_modules/sinon/**/*', included: false, served: true},
+			{pattern: 'node_modules/ui-event-simulator/**/*', included: false, served: true},
+			{pattern: 'dist/leaflet-src.js', included: false, served: true},
+			{pattern: 'src/**/*.js', included: false, served: true},
+			{pattern: 'package.json', included: false, served: true},
 			{pattern: 'dist/**/*.png', included: false, served: true},
 			{pattern: 'spec/setup.js', type: 'module'},
 			{pattern: 'spec/suites/**/*.js', type: 'module'},
@@ -38,15 +45,15 @@ module.exports = function (/** @type {import('karma').Config} */ config) {
 			longestTestsCount: 10
 		},
 		logLevel: config.LOG_WARN,
-		browsers: ['Chrome1280x1024'],
+		browsers: ['Chrome'],
 		customLaunchers: {
-			'Chrome1280x1024': {
+			'Chrome': {
 				base: 'ChromeHeadless',
-				// increased viewport is required for some tests (TODO fix tests)
-				// https://github.com/Leaflet/Leaflet/issues/7113#issuecomment-619528577
-				flags: ['--window-size=1280,1024']
+				flags: [
+					'--window-size=1920,1080', // Set a fixed window size
+				]
 			},
-			'FirefoxTouch': {
+			'Firefox': {
 				base: 'FirefoxHeadless',
 				prefs: {
 					'dom.w3c_touch_events.enabled': 1
@@ -69,7 +76,6 @@ module.exports = function (/** @type {import('karma').Config} */ config) {
 		browserConsoleLogOptions: {level: 'error'},
 		client: {
 			mocha: {
-				// eslint-disable-next-line no-undef
 				forbidOnly: process.env.CI || false
 			}
 		}
@@ -79,7 +85,7 @@ module.exports = function (/** @type {import('karma').Config} */ config) {
 		karmaConfig.plugins.push('karma-coverage');
 		karmaConfig.reporters.push('coverage');
 		karmaConfig.preprocessors = {
-			'dist/leaflet-src.esm.js': 'coverage'
+			'dist/leaflet-src.js': 'coverage'
 		};
 	}
 
